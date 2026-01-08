@@ -1,0 +1,8 @@
+{
+  "name": "Budget Journalier",
+  "short_name": "Budget",
+  "display": "standalone",
+  "start_url": ".",
+  "theme_color": "#0a7a3d",
+  "background_color": "#ffffff"
+}

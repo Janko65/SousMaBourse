@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+  >
+  <title>Budget</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="top">
+  <div class="daily">
+    <span id="dailyAmount">0.00</span>
+    <span class="unit">€ / jour</span>
+  </div>
+
+  <div class="top-row">
+    <span id="today"></span>
+    <button id="periodBtn">Période</button>
+  </div>
+
+  <div class="top-actions">
+    <button class="primary" id="addTx">Transaction</button>
+    <button class="danger" id="reset">Reset</button>
+  </div>
+</header>
+
+<main class="middle" id="txList"></main>
+
+<footer class="bottom">
+  <div class="balance" id="balanceDisplay">Solde : 0 €</div>
+  <button class="primary" id="refresh">Actualiser</button>
+</footer>
+
+<!-- MODALES -->
+<dialog id="balanceModal">
+  <h3>Solde actuel</h3>
+  <input type="number" id="balanceInput" inputmode="numeric">
+  <button id="saveBalance">Valider</button>
+</dialog>
+
+<dialog id="txModal">
+  <h3>Transaction mensuelle</h3>
+
+  <input type="number" id="txAmount" placeholder="Montant">
+
+  <select id="txDay"></select>
+
+  <select id="txType">
+    <option value="debit">Débit</option>
+    <option value="credit">Revenu</option>
+  </select>
+
+  <div class="modal-actions">
+    <button id="saveTx" class="primary">Sauvegarder</button>
+    <button id="deleteTx" class="danger hidden">Supprimer</button>
+  </div>
+</dialog>
+
+<dialog id="periodModal">
+  <h3>Période budgétaire</h3>
+  <label>Jour de début</label>
+  <select id="startDay"></select>
+  <label>Jour de fin</label>
+  <select id="endDay"></select>
+  <button id="savePeriod">Valider</button>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>
