@@ -51,13 +51,11 @@ function effDay(d, y, m) {
 }
 
 /* PERIOD HELPERS */
-// Retourne { year, month, start } correspondant au début de la période courante
 function getPeriodStart() {
   let y = today.getFullYear();
   let m = today.getMonth();
   const currentStart = effDay(settings.startDay, y, m);
   if (today.getDate() < currentStart) {
-    // la période courante a commencé le mois précédent
     m -= 1;
     if (m < 0) {
       m = 11;
@@ -67,23 +65,20 @@ function getPeriodStart() {
   return { year: y, month: m, start: effDay(settings.startDay, y, m) };
 }
 
-// Calcule la Date réelle d'une transaction (numéro de jour) dans la période courante
 function txDateForDay(day) {
   const ps = getPeriodStart();
   let txYear = ps.year;
   let txMonth = ps.month;
 
-  // si le jour est avant startDay, il appartient au mois suivant dans la période
   if (day < settings.startDay) {
-    txMonth = ps.month + 1;
+    txMonth += 1;
     if (txMonth > 11) {
       txMonth = 0;
       txYear += 1;
     }
   }
 
-  const clampedDay = effDay(day, txYear, txMonth);
-  return new Date(txYear, txMonth, clampedDay);
+  return new Date(txYear, txMonth, effDay(day, txYear, txMonth));
 }
 
 function txDateInPeriod(t) {
@@ -91,7 +86,6 @@ function txDateInPeriod(t) {
 }
 
 /* PERIOD */
-
 function periodEnd() {
   const y = today.getFullYear();
   const m = today.getMonth();
@@ -106,7 +100,6 @@ function periodEnd() {
   return new Date(nextY, nextM, nextStart - 1);
 }
 
-
 /* STORAGE */
 function saveAll() {
   localStorage.setItem(LS.balance, balance);
@@ -115,12 +108,9 @@ function saveAll() {
 }
 
 /* CALC */
-
 function calculate() {
-  // Solde restant en tenant compte des transactions futures (non cochées) à partir d'aujourd'hui
   let remaining = balance;
 
-  // Normaliser les dates à minuit pour un calcul propre du nombre de jours
   const todayDate = new Date(
     today.getFullYear(),
     today.getMonth(),
@@ -129,37 +119,45 @@ function calculate() {
   const end = periodEnd();
   const endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
 
-  // Ajouter/Soustraire les transactions à venir (non cochées) jusqu'à la fin de période
   transactions.forEach(t => {
     const txDate = txDateInPeriod(t);
-    // Prendre en compte toutes les transactions non cochées situées dans la période courante (jusqu'à la fin)
     if (!t.checked && txDate <= endDate) {
       remaining += t.type === "debit" ? -t.amount : t.amount;
     }
   });
 
-  // Comptage des jours "exclusif": du lendemain d'aujourd'hui jusqu'à endDate
-  const msPerDay = 24 * 60 * 60 * 1000;
+  const msPerDay = 86400000;
   const rawDays = Math.floor((endDate - todayDate) / msPerDay);
   const days = Math.max(1, rawDays);
 
-  // Affichages
   dailyAmount.textContent = formatEUR(remaining / days);
   periodInfo.textContent = `du ${settings.startDay} au ${endDate.getDate()}`;
 }
-
 
 /* RENDER */
 function render() {
   balanceDisplay.querySelector(".amount").textContent = formatEUR(balance);
   txList.innerHTML = "";
 
+  const todayDate = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
+  let todayMarked = false;
+
   transactions
-    .slice() // clone pour ne pas muter l'original
+    .slice()
     .sort((a, b) => txDateInPeriod(a) - txDateInPeriod(b))
     .forEach(t => {
       const row = document.createElement("div");
       row.className = `tx ${t.type}`;
+
+      const txDate = txDateInPeriod(t);
+      if (!todayMarked && txDate >= todayDate) {
+        row.dataset.today = "true";
+        todayMarked = true;
+      }
 
       const chk = document.createElement("input");
       chk.type = "checkbox";
@@ -239,11 +237,9 @@ document.getElementById("saveTx").onclick = () => {
     title: txTitle.value || "Transaction",
     day,
     type: txType.value,
-    // checked : si la date effective est <= aujourd'hui
     checked: false
   };
 
-  // déterminer checked en utilisant la date dans la période
   const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const txDate = txDateForDay(day);
   txObj.checked = txDate <= todayDate;
@@ -270,28 +266,6 @@ document.getElementById("periodBtn").onclick = () => {
   startDay.value = settings.startDay;
   periodModal.showModal();
 };
-
-document.addEventListener('DOMContentLoaded', () => {
-  const todayISO = new Date().toISOString().slice(0,10);
-  const txs = document.querySelectorAll('.middle .tx');
-  for (const tx of txs) {
-    const dataDate = tx.getAttribute('data-date') || tx.dataset.date;
-    let txDate = null;
-    if (dataDate) txDate = dataDate.slice(0,10);
-    else {
-      const el = tx.querySelector('.tx-date, .date, .date-block');
-      if (el) {
-        const parsed = new Date(el.textContent.trim());
-        if (!isNaN(parsed)) txDate = parsed.toISOString().slice(0,10);
-      }
-    }
-
-    if (txDate === todayISO) {
-      tx.setAttribute('data-today', 'true');
-      break;
-    }
-  }
-});
 
 document.getElementById("savePeriod").onclick = () => {
   settings.startDay = Number(startDay.value);
