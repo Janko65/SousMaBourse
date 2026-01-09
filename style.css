@@ -131,10 +131,11 @@ button {
   border-radius: 14px;
   padding: 10px 12px;
   margin-bottom: 8px;
-  display: grid;
-  grid-template-columns: 32px 90px 1fr 48px;
+  display: inline-grid; /* changed: inline-grid to allow shrink-wrapping */
+  grid-template-columns: 32px 90px auto 48px; /* changed: use auto instead of 1fr so content defines width */
   align-items: center;
   gap: 8px;
+  max-width: 100%; /* prevent overflow on very small screens */
 }
 
 .tx.debit { border-left: 4px solid var(--red); }
