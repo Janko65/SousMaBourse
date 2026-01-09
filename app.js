@@ -271,6 +271,28 @@ document.getElementById("periodBtn").onclick = () => {
   periodModal.showModal();
 };
 
+document.addEventListener('DOMContentLoaded', () => {
+  const todayISO = new Date().toISOString().slice(0,10);
+  const txs = document.querySelectorAll('.middle .tx');
+  for (const tx of txs) {
+    const dataDate = tx.getAttribute('data-date') || tx.dataset.date;
+    let txDate = null;
+    if (dataDate) txDate = dataDate.slice(0,10);
+    else {
+      const el = tx.querySelector('.tx-date, .date, .date-block');
+      if (el) {
+        const parsed = new Date(el.textContent.trim());
+        if (!isNaN(parsed)) txDate = parsed.toISOString().slice(0,10);
+      }
+    }
+
+    if (txDate === todayISO) {
+      tx.setAttribute('data-today', 'true');
+      break;
+    }
+  }
+});
+
 document.getElementById("savePeriod").onclick = () => {
   settings.startDay = Number(startDay.value);
   saveAll();
