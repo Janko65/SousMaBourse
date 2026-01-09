@@ -132,8 +132,8 @@ function calculate() {
   // Ajouter/Soustraire les transactions à venir (non cochées) jusqu'à la fin de période
   transactions.forEach(t => {
     const txDate = txDateInPeriod(t);
-    // uniquement transactions futures ou aujourd’hui, et non déjà validées
-    if (txDate >= todayDate && !t.checked) {
+    // Prendre en compte toutes les transactions non cochées situées dans la période courante (jusqu'à la fin)
+    if (!t.checked && txDate <= endDate) {
       remaining += t.type === "debit" ? -t.amount : t.amount;
     }
   });
