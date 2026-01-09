@@ -2,73 +2,70 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-  >
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Budget</title>
-  <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
 </head>
 
 <body>
 
 <header class="top">
-  <div class="daily">
-    <span id="dailyAmount">0.00</span>
-    <span class="unit">€ / jour</span>
-  </div>
-
-  <div class="top-row">
-    <span id="today"></span>
-    <button id="periodBtn">Période</button>
+  <div class="top-line">
+    <div class="amount">
+      <span id="dailyAmount">0.00€</span>
+      <span class="sub">par jour</span>
+    </div>
+    <div id="today" class="today"></div>
   </div>
 
   <div class="top-actions">
-    <button class="primary" id="addTx">Transaction</button>
-    <button class="danger" id="reset">Reset</button>
+    <button id="periodBtn" class="secondary">Période</button>
+    <button id="addTx" class="primary">Transaction</button>
+    <button id="reset" class="danger">Reset</button>
   </div>
 </header>
 
-<main class="middle" id="txList"></main>
+<main id="txList" class="middle"></main>
 
 <footer class="bottom">
-  <div class="balance" id="balanceDisplay">Solde : 0 €</div>
-  <button class="primary" id="refresh">Actualiser</button>
+  <div class="amount">
+    <span id="balanceDisplay">0€</span>
+    <span class="sub">Indiquer le montant de votre solde actuel</span>
+  </div>
+  <button id="refresh" class="primary">Actualiser</button>
 </footer>
 
 <!-- MODALES -->
+
 <dialog id="balanceModal">
-  <h3>Solde actuel</h3>
-  <input type="number" id="balanceInput" inputmode="numeric">
-  <button id="saveBalance">Valider</button>
+  <input id="balanceInput" type="number" inputmode="decimal"
+         placeholder="Montant du solde">
+  <button id="saveBalance" class="primary full">Valider</button>
 </dialog>
 
 <dialog id="txModal">
-  <h3>Transaction mensuelle</h3>
-
-  <input type="number" id="txAmount" placeholder="Montant">
-
+  <input id="txTitle" placeholder="Titre de la transaction">
+  <input id="txAmount" type="number" inputmode="decimal" placeholder="Montant">
   <select id="txDay"></select>
-
   <select id="txType">
     <option value="debit">Débit</option>
     <option value="credit">Revenu</option>
   </select>
 
   <div class="modal-actions">
+    <button id="cancelTx" class="danger">Annuler</button>
     <button id="saveTx" class="primary">Sauvegarder</button>
-    <button id="deleteTx" class="danger hidden">Supprimer</button>
   </div>
+
+  <button id="deleteTx" class="danger full hidden">Supprimer</button>
 </dialog>
 
 <dialog id="periodModal">
-  <h3>Période budgétaire</h3>
-  <label>Jour de début</label>
   <select id="startDay"></select>
-  <label>Jour de fin</label>
   <select id="endDay"></select>
-  <button id="savePeriod">Valider</button>
+  <button id="savePeriod" class="primary full">Valider</button>
 </dialog>
 
 <script src="app.js"></script>
