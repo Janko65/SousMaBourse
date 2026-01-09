@@ -50,6 +50,46 @@ function effDay(d, y, m) {
   return Math.min(d, lastDay(y, m));
 }
 
+/* PERIOD HELPERS */
+// Retourne { year, month, start } correspondant au début de la période courante
+function getPeriodStart() {
+  let y = today.getFullYear();
+  let m = today.getMonth();
+  const currentStart = effDay(settings.startDay, y, m);
+  if (today.getDate() < currentStart) {
+    // la période courante a commencé le mois précédent
+    m -= 1;
+    if (m < 0) {
+      m = 11;
+      y -= 1;
+    }
+  }
+  return { year: y, month: m, start: effDay(settings.startDay, y, m) };
+}
+
+// Calcule la Date réelle d'une transaction (numéro de jour) dans la période courante
+function txDateForDay(day) {
+  const ps = getPeriodStart();
+  let txYear = ps.year;
+  let txMonth = ps.month;
+
+  // si le jour est avant startDay, il appartient au mois suivant dans la période
+  if (day < settings.startDay) {
+    txMonth = ps.month + 1;
+    if (txMonth > 11) {
+      txMonth = 0;
+      txYear += 1;
+    }
+  }
+
+  const clampedDay = effDay(day, txYear, txMonth);
+  return new Date(txYear, txMonth, clampedDay);
+}
+
+function txDateInPeriod(t) {
+  return txDateForDay(t.day);
+}
+
 /* PERIOD */
 
 function periodEnd() {
@@ -86,16 +126,12 @@ function calculate() {
     today.getMonth(),
     today.getDate()
   );
-  const end = periodEnd(); // utiliser la version corrigée
+  const end = periodEnd();
   const endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
 
   // Ajouter/Soustraire les transactions à venir (non cochées) jusqu'à la fin de période
   transactions.forEach(t => {
-    const txDate = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      effDay(t.day, today.getFullYear(), today.getMonth())
-    );
+    const txDate = txDateInPeriod(t);
     // uniquement transactions futures ou aujourd’hui, et non déjà validées
     if (txDate >= todayDate && !t.checked) {
       remaining += t.type === "debit" ? -t.amount : t.amount;
@@ -119,7 +155,8 @@ function render() {
   txList.innerHTML = "";
 
   transactions
-    .sort((a, b) => a.day - b.day)
+    .slice() // clone pour ne pas muter l'original
+    .sort((a, b) => txDateInPeriod(a) - txDateInPeriod(b))
     .forEach(t => {
       const row = document.createElement("div");
       row.className = `tx ${t.type}`;
@@ -196,18 +233,24 @@ document.getElementById("saveTx").onclick = () => {
   const day = Number(txDay.value);
   if (!amount || !day) return;
 
-  const tx = {
+  const txObj = {
     id: editingId || crypto.randomUUID(),
     amount,
     title: txTitle.value || "Transaction",
     day,
     type: txType.value,
-    checked: effDay(day, today.getFullYear(), today.getMonth()) <= today.getDate()
+    // checked : si la date effective est <= aujourd'hui
+    checked: false
   };
 
+  // déterminer checked en utilisant la date dans la période
+  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const txDate = txDateForDay(day);
+  txObj.checked = txDate <= todayDate;
+
   transactions = editingId
-    ? transactions.map(t => t.id === editingId ? tx : t)
-    : [...transactions, tx];
+    ? transactions.map(t => t.id === editingId ? txObj : t)
+    : [...transactions, txObj];
 
   saveAll();
   txModal.close();
@@ -233,6 +276,7 @@ document.getElementById("savePeriod").onclick = () => {
   saveAll();
   periodModal.close();
   calculate();
+  render();
 };
 
 document.getElementById("reset").onclick = () => {
