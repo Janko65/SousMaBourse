@@ -51,14 +51,21 @@ function effDay(d, y, m) {
 }
 
 /* PERIOD */
+
 function periodEnd() {
- const y = today.getFullYear();
- const m = today.getMonth();
- // fin de période = veille du startDay suivant
- const nextMonth = new Date(y, m + 1, 1);
- const endDay = effDay(settings.startDay - 1 || lastDay(y, m), nextMonth.getFullYear(), nextMonth.getMonth());
- return new Date(nextMonth.getFullYear(), nextMonth.getMonth(), endDay);
+  const y = today.getFullYear();
+  const m = today.getMonth();
+  const d = today.getDate();
+  const currentStart = effDay(settings.startDay, y, m);
+  let nextY = y, nextM = m;
+  if (d >= currentStart) {
+    nextM += 1;
+    if (nextM > 11) { nextM = 0; nextY += 1; }
+  }
+  const nextStart = effDay(settings.startDay, nextY, nextM);
+  return new Date(nextY, nextM, nextStart - 1);
 }
+
 
 /* STORAGE */
 function saveAll() {
@@ -68,30 +75,43 @@ function saveAll() {
 }
 
 /* CALC */
+
 function calculate() {
- let remaining = balance;
- const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
- const end = periodEnd();
- const endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
- transactions.forEach(t => {
-   const txDate = new Date(
-     today.getFullYear(),
-     today.getMonth(),
-     effDay(t.day, today.getFullYear(), today.getMonth())
-   );
-   // uniquement transactions futures ou aujourd’hui
-   if (txDate >= todayDate && !t.checked) {
-     remaining += t.type === "debit" ? -t.amount : t.amount;
-   }
- });
- const days = Math.max(
-   1,
-   Math.round((endDate - todayDate) / 86400000) + 1
- );
- dailyAmount.textContent = formatEUR(remaining / days);
- periodInfo.textContent =
-   `du ${settings.startDay} au ${endDate.getDate()}`;
+  // Solde restant en tenant compte des transactions futures (non cochées) à partir d'aujourd'hui
+  let remaining = balance;
+
+  // Normaliser les dates à minuit pour un calcul propre du nombre de jours
+  const todayDate = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
+  const end = periodEnd(); // utiliser la version corrigée
+  const endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+
+  // Ajouter/Soustraire les transactions à venir (non cochées) jusqu'à la fin de période
+  transactions.forEach(t => {
+    const txDate = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      effDay(t.day, today.getFullYear(), today.getMonth())
+    );
+    // uniquement transactions futures ou aujourd’hui, et non déjà validées
+    if (txDate >= todayDate && !t.checked) {
+      remaining += t.type === "debit" ? -t.amount : t.amount;
+    }
+  });
+
+  // Comptage des jours "exclusif": du lendemain d'aujourd'hui jusqu'à endDate
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const rawDays = Math.floor((endDate - todayDate) / msPerDay);
+  const days = Math.max(1, rawDays);
+
+  // Affichages
+  dailyAmount.textContent = formatEUR(remaining / days);
+  periodInfo.textContent = `du ${settings.startDay} au ${endDate.getDate()}`;
 }
+
 
 /* RENDER */
 function render() {
