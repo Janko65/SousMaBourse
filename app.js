@@ -52,9 +52,12 @@ function effDay(d, y, m) {
 
 /* PERIOD */
 function periodEnd() {
-  const y = today.getFullYear();
-  const m = today.getMonth();
-  return new Date(y, m + 1, effDay(settings.startDay - 1 || 31, y, m + 1));
+ const y = today.getFullYear();
+ const m = today.getMonth();
+ // fin de période = veille du startDay suivant
+ const nextMonth = new Date(y, m + 1, 1);
+ const endDay = effDay(settings.startDay - 1 || lastDay(y, m), nextMonth.getFullYear(), nextMonth.getMonth());
+ return new Date(nextMonth.getFullYear(), nextMonth.getMonth(), endDay);
 }
 
 /* STORAGE */
@@ -66,19 +69,28 @@ function saveAll() {
 
 /* CALC */
 function calculate() {
-  let remaining = balance;
-  transactions.forEach(t => {
-    if (!t.checked)
-      remaining += t.type === "debit" ? -t.amount : t.amount;
-  });
-
-  const days =
-    Math.max(1, Math.ceil((periodEnd() - today) / 86400000) + 1);
-
-  dailyAmount.textContent = formatEUR(remaining / days);
-  periodInfo.textContent =
-    `du ${settings.startDay} au ${effDay(settings.startDay - 1 || 31,
-      today.getFullYear(), today.getMonth())}`;
+ let remaining = balance;
+ const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+ const end = periodEnd();
+ const endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+ transactions.forEach(t => {
+   const txDate = new Date(
+     today.getFullYear(),
+     today.getMonth(),
+     effDay(t.day, today.getFullYear(), today.getMonth())
+   );
+   // uniquement transactions futures ou aujourd’hui
+   if (txDate >= todayDate && !t.checked) {
+     remaining += t.type === "debit" ? -t.amount : t.amount;
+   }
+ });
+ const days = Math.max(
+   1,
+   Math.round((endDate - todayDate) / 86400000) + 1
+ );
+ dailyAmount.textContent = formatEUR(remaining / days);
+ periodInfo.textContent =
+   `du ${settings.startDay} au ${endDate.getDate()}`;
 }
 
 /* RENDER */
