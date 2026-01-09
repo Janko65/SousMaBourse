@@ -7,19 +7,21 @@
     content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Budget</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
 </head>
 
 <body>
 
 <header class="top">
   <div class="top-line">
-    <div class="amount">
-      <span id="dailyAmount">0.00€</span>
-      <span class="sub">de disponible par jour jusqu’à la fin du mois.</span>
+    <div class="amount-block">
+      <div id="dailyAmount" class="amount">0€</div>
+      <div class="sub">
+        de disponible par jour jusqu’à la fin du mois.
+      </div>
     </div>
+
     <div class="date-block">
-      <div id="today" class="today"></div>
+      <div id="today"></div>
       <div id="periodInfo" class="period-info"></div>
     </div>
   </div>
@@ -34,24 +36,29 @@
 <main id="txList" class="middle"></main>
 
 <footer class="bottom">
-  <div class="amount">
-    <span id="balanceDisplay">0€</span>
-    <span class="sub">Indiquer le montant de votre solde actuel</span>
+  <div id="balanceDisplay" class="balance-editable">
+    <div class="amount">0€</div>
+    <div class="sub">Indiquer le montant de votre solde actuel</div>
   </div>
-  <button id="refresh" class="primary">Actualiser</button>
 </footer>
 
-<!-- MODALES -->
-
-<dialog id="balanceModal" tabindex="-1">
-  <input id="balanceInput" type="number" inputmode="decimal"
+<!-- MODALE SOLDE -->
+<dialog id="balanceModal">
+  <input id="balanceInput"
+         type="number"
+         inputmode="decimal"
          placeholder="Montant du solde">
   <button id="saveBalance" class="primary full">Valider</button>
 </dialog>
 
-<dialog id="txModal" tabindex="-1">
-  <input id="txTitle" placeholder="Titre de la transaction">
-  <input id="txAmount" type="number" inputmode="decimal" placeholder="Montant">
+<!-- MODALE TRANSACTION -->
+<dialog id="txModal">
+  <input id="txAmount"
+         type="number"
+         inputmode="decimal"
+         placeholder="Montant">
+  <input id="txTitle"
+         placeholder="Titre de la transaction">
   <select id="txDay">
     <option value="" disabled selected>Date de la transaction</option>
   </select>
@@ -68,7 +75,8 @@
   <button id="deleteTx" class="danger full hidden">Supprimer</button>
 </dialog>
 
-<dialog id="periodModal" tabindex="-1">
+<!-- MODALE PERIODE -->
+<dialog id="periodModal">
   <label class="period-label">
     Date de début du mois :
     <select id="startDay"></select>
