@@ -129,15 +129,12 @@ button {
 .tx {
   background: var(--panel);
   border-radius: 14px;
-  padding: 6px 12px; /* réduit le padding vertical pour diminuer la hauteur */
+  padding: 10px 12px;
   margin-bottom: 8px;
   display: grid;
   grid-template-columns: 32px 90px 1fr 48px;
   align-items: center;
-  gap: 6px; /* réduit l'espacement vertical/entre colonnes */
-  height: auto; /* s'ajuste au contenu */
-  min-height: 0;
-  line-height: 1;
+  gap: 8px;
 }
 
 .tx.debit { border-left: 4px solid var(--red); }
