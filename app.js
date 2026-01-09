@@ -118,42 +118,39 @@ function render() {
   balanceDisplay.querySelector(".amount").textContent = formatEUR(balance);
   txList.innerHTML = "";
 
+  transactions
+    .sort((a, b) => a.day - b.day)
+    .forEach(t => {
+      const row = document.createElement("div");
+      row.className = `tx ${t.type}`;
 
-transactions
-  .slice()                 // optionnel: pour ne pas muter l'ordre source
-  .sort(periodCompare)     // tri cyclique en fonction de startDay
-  .forEach(t => {
-    const row = document.createElement("div");
-    row.className = `tx ${t.type}`;
+      const chk = document.createElement("input");
+      chk.type = "checkbox";
+      chk.checked = t.checked;
+      chk.onclick = e => {
+        e.stopPropagation();
+        t.checked = chk.checked;
+        saveAll();
+        calculate();
+      };
 
-    const chk = document.createElement("input");
-    chk.type = "checkbox";
-    chk.checked = t.checked;
-    chk.onclick = e => {
-      e.stopPropagation();
-      t.checked = chk.checked;
-      saveAll();
-      calculate();
-    };
+      row.append(
+        chk,
+        Object.assign(document.createElement("span"), {
+          className: "amount",
+          textContent: formatEUR(t.amount)
+        }),
+        Object.assign(document.createElement("span"), {
+          textContent: t.title
+        }),
+        Object.assign(document.createElement("span"), {
+          textContent: "J" + effDay(t.day, today.getFullYear(), today.getMonth())
+        })
+      );
 
-    row.append(
-      chk,
-      Object.assign(document.createElement("span"), {
-        className: "amount",
-        textContent: formatEUR(t.amount)
-      }),
-      Object.assign(document.createElement("span"), {
-        textContent: t.title
-      }),
-      Object.assign(document.createElement("span"), {
-        textContent: "J" + effDay(t.day, today.getFullYear(), today.getMonth())
-      })
-    );
-
-    row.onclick = () => openTx(t);
-    txList.appendChild(row);
-  });
-
+      row.onclick = () => openTx(t);
+      txList.appendChild(row);
+    });
 
   calculate();
 }
