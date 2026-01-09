@@ -2,8 +2,9 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Budget</title>
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json">
@@ -15,9 +16,12 @@
   <div class="top-line">
     <div class="amount">
       <span id="dailyAmount">0.00€</span>
-      <span class="sub">par jour</span>
+      <span class="sub">de disponible par jour jusqu’à la fin du mois.</span>
     </div>
-    <div id="today" class="today"></div>
+    <div class="date-block">
+      <div id="today" class="today"></div>
+      <div id="periodInfo" class="period-info"></div>
+    </div>
   </div>
 
   <div class="top-actions">
@@ -39,32 +43,36 @@
 
 <!-- MODALES -->
 
-<dialog id="balanceModal">
+<dialog id="balanceModal" tabindex="-1">
   <input id="balanceInput" type="number" inputmode="decimal"
          placeholder="Montant du solde">
   <button id="saveBalance" class="primary full">Valider</button>
 </dialog>
 
-<dialog id="txModal">
+<dialog id="txModal" tabindex="-1">
   <input id="txTitle" placeholder="Titre de la transaction">
   <input id="txAmount" type="number" inputmode="decimal" placeholder="Montant">
-  <select id="txDay"></select>
+  <select id="txDay">
+    <option value="" disabled selected>Date de la transaction</option>
+  </select>
   <select id="txType">
     <option value="debit">Débit</option>
     <option value="credit">Revenu</option>
   </select>
 
   <div class="modal-actions">
-    <button id="cancelTx" class="danger">Annuler</button>
+    <button id="cancelTx" class="secondary">Annuler</button>
     <button id="saveTx" class="primary">Sauvegarder</button>
   </div>
 
   <button id="deleteTx" class="danger full hidden">Supprimer</button>
 </dialog>
 
-<dialog id="periodModal">
-  <select id="startDay"></select>
-  <select id="endDay"></select>
+<dialog id="periodModal" tabindex="-1">
+  <label class="period-label">
+    Date de début du mois :
+    <select id="startDay"></select>
+  </label>
   <button id="savePeriod" class="primary full">Valider</button>
 </dialog>
 

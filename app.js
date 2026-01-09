@@ -7,8 +7,7 @@ const LS = {
 let balance = Number(localStorage.getItem(LS.balance)) || 0;
 let transactions = JSON.parse(localStorage.getItem(LS.tx)) || [];
 let settings = JSON.parse(localStorage.getItem(LS.settings)) || {
-  startDay: 1,
-  endDay: 31
+  startDay: 1
 };
 
 let editingId = null;
@@ -16,6 +15,7 @@ const today = new Date();
 
 /* DOM */
 const todayEl = document.getElementById("today");
+const periodInfo = document.getElementById("periodInfo");
 const dailyAmount = document.getElementById("dailyAmount");
 const balanceDisplay = document.getElementById("balanceDisplay");
 const txList = document.getElementById("txList");
@@ -31,7 +31,6 @@ const txDay = document.getElementById("txDay");
 const txType = document.getElementById("txType");
 
 const startDay = document.getElementById("startDay");
-const endDay = document.getElementById("endDay");
 
 const saveBalance = document.getElementById("saveBalance");
 const saveTx = document.getElementById("saveTx");
@@ -43,11 +42,18 @@ const refresh = document.getElementById("refresh");
 const reset = document.getElementById("reset");
 const periodBtn = document.getElementById("periodBtn");
 
+/* FORMAT */
+function formatEUR(value) {
+  if (value % 1 === 0) {
+    return value + "€";
+  }
+  return value.toFixed(2).replace(".", ",") + "€";
+}
+
 /* INIT */
 todayEl.textContent = today.toLocaleDateString("fr-FR");
 
 function fillDays(select) {
-  select.innerHTML = "";
   for (let i = 1; i <= 31; i++) {
     const o = document.createElement("option");
     o.value = i;
@@ -55,7 +61,8 @@ function fillDays(select) {
     select.appendChild(o);
   }
 }
-[txDay, startDay, endDay].forEach(fillDays);
+fillDays(startDay);
+fillDays(txDay);
 
 /* DATES */
 function lastDayOfMonth(y, m) {
@@ -70,13 +77,13 @@ function getPeriodBounds() {
   const y = today.getFullYear();
   let m = today.getMonth();
 
-  let start = new Date(y, m, effectiveDay(settings.startDay, y, m));
-  let end = new Date(y, m, effectiveDay(settings.endDay, y, m));
+  const start = new Date(y, m, effectiveDay(settings.startDay, y, m));
+  const end = new Date(start);
+  end.setMonth(end.getMonth() + 1);
+  end.setDate(
+    effectiveDay(settings.startDay - 1 || 31, end.getFullYear(), end.getMonth())
+  );
 
-  if (end < start) {
-    end.setMonth(end.getMonth() + 1);
-    end.setDate(effectiveDay(settings.endDay, end.getFullYear(), end.getMonth()));
-  }
   return { start, end };
 }
 
@@ -102,13 +109,17 @@ function calculate() {
     }
   });
 
-  dailyAmount.textContent =
-    (remaining / daysRemaining(end)).toFixed(2) + "€";
+  dailyAmount.textContent = formatEUR(remaining / daysRemaining(end));
+
+  periodInfo.textContent =
+    `du ${settings.startDay} au ${
+      effectiveDay(settings.startDay - 1 || 31, end.getFullYear(), end.getMonth())
+    }`;
 }
 
 /* RENDER */
 function render() {
-  balanceDisplay.textContent = balance + "€";
+  balanceDisplay.textContent = formatEUR(balance);
   txList.innerHTML = "";
 
   const y = today.getFullYear();
@@ -132,7 +143,7 @@ function render() {
 
       const amount = document.createElement("span");
       amount.className = "amount";
-      amount.textContent = t.amount + "€";
+      amount.textContent = formatEUR(t.amount);
 
       const title = document.createElement("span");
       title.textContent = t.title;
@@ -158,12 +169,22 @@ function openTx(t) {
   txType.value = t.type;
   deleteTx.classList.remove("hidden");
   txModal.showModal();
+  txModal.focus();
 }
+
+txModal.addEventListener("click", e => {
+  if (e.target === txModal) txModal.close();
+});
+
+periodModal.addEventListener("click", e => {
+  if (e.target === periodModal) periodModal.close();
+});
 
 /* EVENTS */
 balanceDisplay.onclick = () => {
   balanceInput.value = balance;
   balanceModal.showModal();
+  setTimeout(() => balanceInput.focus(), 150);
 };
 
 saveBalance.onclick = () => {
@@ -177,22 +198,21 @@ addTx.onclick = () => {
   editingId = null;
   txTitle.value = "";
   txAmount.value = "";
-  txDay.value = today.getDate();
+  txDay.value = "";
   txType.value = "debit";
   deleteTx.classList.add("hidden");
   txModal.showModal();
+  txModal.focus();
 };
 
-cancelTx.onclick = () => {
-  txModal.close();
-};
+cancelTx.onclick = () => txModal.close();
 
 saveTx.onclick = () => {
   const title = txTitle.value || "Transaction";
   const amount = Number(txAmount.value);
   const day = Number(txDay.value);
   const type = txType.value;
-  if (!amount) return;
+  if (!amount || !day) return;
 
   if (editingId) {
     Object.assign(
@@ -225,13 +245,12 @@ deleteTx.onclick = () => {
 
 periodBtn.onclick = () => {
   startDay.value = settings.startDay;
-  endDay.value = settings.endDay;
   periodModal.showModal();
+  periodModal.focus();
 };
 
 savePeriod.onclick = () => {
   settings.startDay = Number(startDay.value);
-  settings.endDay = Number(endDay.value);
   saveAll();
   periodModal.close();
   calculate();
