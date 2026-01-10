@@ -23,6 +23,19 @@ function getPeriodStart() {
 
 function getPeriodKey() { const p = getPeriodStart(); return `${p.year}-${p.month}-${p.start}`; }
 
+function scrollToFirstUnchecked() {
+  const firstUnchecked = txList.querySelector('.tx input[type="checkbox"]:not(:checked)');
+  if (!firstUnchecked) return;
+
+  const row = firstUnchecked.closest('.tx');
+  if (!row) return;
+
+  row.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+}
+
 const currentPeriodKey = getPeriodKey();
 const storedPeriodKey = localStorage.getItem(LS.periodKey);
 if (storedPeriodKey !== currentPeriodKey) {
@@ -180,3 +193,4 @@ document.getElementById("restoreData").onclick=()=>{
 document.getElementById("hardReset").onclick=()=>{ if(confirm("Tout effacer ?")){ localStorage.clear(); location.reload(); } };
 
 render();
+setTimeout(scrollToFirstUnchecked, 150);
