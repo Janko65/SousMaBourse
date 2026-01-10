@@ -63,8 +63,14 @@ button { height: 44px; border-radius: 10px; border: none; font-size: 14px; font-
   min-height: 36px;
 }
 
-.tx input[type="checkbox"] { justify-self: center; width: 18px; height: 18px; transform: scale(1); appearance: auto; margin: 0; }
-
+.tx input[type="checkbox"] {
+  justify-self: center;
+  width: 18px;
+  height: 18px;
+  transform: scale(1);
+  margin: -6px; /* zone cliquable plus large */
+  cursor: pointer;
+}
 .tx.debit { border-left: 4px solid var(--red); }
 .tx.credit { border-left: 4px solid var(--green); }
 .tx .amount { font-size: 15px; font-weight: 600; }
