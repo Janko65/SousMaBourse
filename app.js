@@ -105,14 +105,30 @@ function render(){
   txList.innerHTML="";
   let todayMarked=false;
   const todayDate=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+  
   transactions.slice().sort((a,b)=>txDateForDay(a.day)-txDateForDay(b.day)).forEach(t=>{
     const row=document.createElement("div");
     row.className=`tx ${t.type}`;
     const txDate=txDateForDay(t.day);
     if(!todayMarked && txDate>=todayDate){ row.dataset.today="true"; todayMarked=true; }
+    
     const chk=document.createElement("input");
-    chk.type="checkbox"; chk.checked=t.checked;
-    chk.onclick=e=>{ e.stopPropagation(); t.checked=chk.checked; saveAll(); calculate(); };
+    chk.type="checkbox"; 
+    chk.checked=t.checked;
+
+    // couleur initiale de la case
+    chk.style.accentColor = chk.checked ? (t.type === "debit" ? "var(--red)" : "var(--green)") : "";
+
+    // action au clic
+    chk.onclick = e => {
+      e.stopPropagation();
+      t.checked = chk.checked;
+      saveAll();
+      calculate();
+      // couleur dynamique
+      chk.style.accentColor = chk.checked ? (t.type === "debit" ? "var(--red)" : "var(--green)") : "";
+    };
+
     row.append(
       chk,
       Object.assign(document.createElement("span"),{className:"amount",textContent:formatEUR(t.amount)}),
@@ -122,6 +138,7 @@ function render(){
     row.onclick=()=>openTx(t);
     txList.appendChild(row);
   });
+
   calculate();
 }
 
