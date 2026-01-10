@@ -11,110 +11,35 @@
   --border: #2a2f3a;
 }
 
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-html,
-body {
-  margin: 0;
-  height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  overflow: hidden;
-}
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; overflow: hidden; }
 
 /* STRUCTURE */
-
-.top,
-.bottom {
-  position: fixed;
-  left: 0;
-  right: 0;
-  height: 120px;
-  padding: 14px 16px;
-  background: var(--panel);
-  z-index: 10;
+.top, .bottom {
+  position: fixed; left: 0; right: 0; height: 120px; padding: 14px 16px; background: var(--panel); z-index: 10;
 }
 
-.top {
-  top: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.bottom {
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.middle {
-  position: absolute;
-  top: 120px;
-  bottom: 120px;
-  left: 0;
-  right: 0;
-  padding: 12px;
-  overflow-y: auto;
-}
+.top { top: 0; display: flex; flex-direction: column; justify-content: space-between; }
+.bottom { bottom: 0; display: flex; align-items: center; justify-content: center; }
+.middle { position: absolute; top: 120px; bottom: 120px; left: 0; right: 0; padding: 12px; overflow-y: auto; }
 
 /* TOP */
-
-.top-line {
-  display: flex;
-  justify-content: space-between;
-}
-
-.amount {
-  font-size: 32px;
-  font-weight: 700;
-}
-
-.sub {
-  font-size: 13px;
-  color: var(--muted);
-  margin-top: 4px;
-}
-
-.date-block {
-  text-align: right;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.period-info {
-  font-size: 12px;
-  margin-top: 2px;
-}
+.top-line { display: flex; justify-content: space-between; }
+.amount { font-size: 32px; font-weight: 700; }
+.sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.date-block { text-align: right; font-size: 13px; color: var(--muted); }
+.period-info { font-size: 12px; margin-top: 2px; }
 
 /* BUTTONS */
-
-.top-actions {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-button {
-  height: 44px;
-  border-radius: 10px;
-  border: none;
-  font-size: 14px;
-  font-weight: 600;
-}
-
+.top-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+button { height: 44px; border-radius: 10px; border: none; font-size: 14px; font-weight: 600; }
 .primary { background: var(--green); color: #fff; }
 .secondary { background: var(--gray); color: var(--text); }
 .danger { background: var(--red); color: #fff; }
 .full { width: 100%; }
 
 /* BOTTOM */
-
 .balance-editable {
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -125,170 +50,33 @@ button {
 }
 
 /* TRANSACTIONS */
-
-/* tailles réduites pour les bandeaux de transaction (sans toucher au contenu interne) */
 .tx {
   background: var(--panel);
   border-radius: 12px;
-  padding: 6px 8px;        /* réduit pour compacter la hauteur */
-  margin-bottom: 6px;      /* réduit */
+  padding: 6px 8px;
+  margin-bottom: 6px;
   display: grid;
-  grid-template-columns: 28px 72px 1fr 44px; /* colonnes légèrement plus compactes */
+  grid-template-columns: 28px 72px 1fr 44px;
   align-items: center;
   gap: 8px;
-  position: relative; /* permet pseudo-éléments si on utilise data-today */
-  min-height: 36px;   /* garantit que la transaction reste plus grande que la checkbox */
+  position: relative;
+  min-height: 36px;
 }
 
-/* Séparer la taille de la checkbox pour qu'elle soit un peu plus petite que la tx */
-.tx input[type="checkbox"] {
-  justify-self: center;
-  width: 18px;
-  height: 18px;
-  /* fallback si certains navigateurs ignorent width/height :
-     on applique aussi un scale léger pour réduire l'apparence */
-  transform: scale(1);
-  -webkit-transform: scale(1);
-  appearance: auto;
-  -webkit-appearance: checkbox;
-  margin: 0;
-}
-
-/* Si tu veux forcer un rendu identique sur tous les navigateurs,
-   remplacer appearance par ceci (décommenter) et styliser manuellement :
-.tx input[type="checkbox"] {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  border: 2px solid var(--border);
-  background: transparent;
-}
-.tx input[type="checkbox"]:checked {
-  background: var(--green); border-color: var(--green);
-}
-*/
+.tx input[type="checkbox"] { justify-self: center; width: 18px; height: 18px; transform: scale(1); appearance: auto; margin: 0; }
 
 .tx.debit { border-left: 4px solid var(--red); }
 .tx.credit { border-left: 4px solid var(--green); }
-
-.tx .amount {
-  font-size: 15px;
-  font-weight: 600;
-}
+.tx .amount { font-size: 15px; font-weight: 600; }
 
 /* MODALES */
-
-dialog {
-  border: none;
-  border-radius: 18px;
-  padding: 20px;
-  width: 90%;
-  max-width: 340px;
-  background: var(--panel);
-  color: var(--text);
-}
-
-dialog::backdrop {
-  background: rgba(0,0,0,.6);
-}
-
-input,
-select {
-  width: 100%;
-  height: 44px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--panel-alt);
-  color: var(--text);
-  font-size: 16px;
-  text-align: center;
-  margin-bottom: 12px;
-}
-
-.modal-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
+dialog { border: none; border-radius: 18px; padding: 20px; width: 90%; max-width: 340px; background: var(--panel); color: var(--text); }
+dialog::backdrop { background: rgba(0,0,0,.6); }
+input, select { width: 100%; height: 44px; border-radius: 10px; border: 1px solid var(--border); background: var(--panel-alt); color: var(--text); font-size: 16px; text-align: center; margin-bottom: 12px; }
+.modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
 .hidden { display: none; }
 
-/* --- TODAY DIVIDER --- */
-/* Deux options côté HTML :
-   1) Placer un élément séparateur avant la première transaction du jour :
-      <div class="today-divider"><span class="bubble">aujourd'hui</span></div>
-   2) OU marquer la transaction qui commence aujourd'hui :
-      <div class="tx" data-today="true"> ... </div>
-*/
-
-/* 1) Separateur autonome */
-.today-divider {
-  position: relative;
-  height: 20px;
-  margin: 8px 0;
-}
-
-.today-divider::before {
-  content: "";
-  position: absolute;
-  left: 12px;            /* aligné sur le padding de .middle */
-  right: 12px;
-  top: 50%;
-  height: 2px;
-  background: var(--red);
-  transform: translateY(-50%);
-  border-radius: 2px;
-}
-
-.today-divider .bubble {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--panel);
-  color: var(--text);
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 2px solid var(--red);
-  line-height: 1;
-  white-space: nowrap;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.25);
-}
-
-/* 2) Pseudo-éléments directement sur .tx si vous préférez ajouter un attribut */
-.tx[data-today="true"] {
-  position: relative;
-  margin-top: 14px; /* espace pour la ligne/bulle créée par les pseudo-éléments */
-}
-
-.tx[data-today="true"]::before {
-  content: "";
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  top: -12px;
-  height: 2px;
-  background: var(--red);
-  border-radius: 2px;
-}
-
-.tx[data-today="true"]::after {
-  content: "aujourd'hui";
-  position: absolute;
-  left: 50%;
-  top: -22px;
-  transform: translateX(-50%);
-  background: var(--panel);
-  color: var(--text);
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 2px solid var(--red);
-  line-height: 1;
-  white-space: nowrap;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.25);
-}
+/* TODAY */
+.tx[data-today="true"] { position: relative; margin-top: 14px; }
+.tx[data-today="true"]::before { content: ""; position: absolute; left: 12px; right: 12px; top: -12px; height: 2px; background: var(--red); border-radius: 2px; }
+.tx[data-today="true"]::after { content: "aujourd'hui"; position: absolute; left: 50%; top: -22px; transform: translateX(-50%); background: var(--panel); color: var(--text); font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 2px solid var(--red); line-height: 1; white-space: nowrap; box-shadow: 0 1px 0 rgba(0,0,0,0.25); }
