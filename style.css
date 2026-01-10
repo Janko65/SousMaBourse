@@ -126,15 +126,17 @@ button {
 
 /* TRANSACTIONS */
 
+/* tailles réduites pour les bandeaux de transaction (sans toucher au contenu interne) */
 .tx {
   background: var(--panel);
-  border-radius: 14px;
-  padding: 10px 12px;
-  margin-bottom: 8px;
+  border-radius: 12px;
+  padding: 8px 10px;        /* réduit */
+  margin-bottom: 6px;       /* réduit */
   display: grid;
-  grid-template-columns: 32px 90px 1fr 48px;
+  grid-template-columns: 28px 72px 1fr 44px; /* colonnes légèrement plus compactes */
   align-items: center;
   gap: 8px;
+  position: relative; /* permet pseudo-éléments si on utilise data-today */
 }
 
 .tx.debit { border-left: 4px solid var(--red); }
@@ -186,3 +188,80 @@ select {
 }
 
 .hidden { display: none; }
+
+/* --- TODAY DIVIDER --- */
+/* Deux options côté HTML :
+   1) Placer un élément séparateur avant la première transaction du jour :
+      <div class="today-divider"><span class="bubble">aujourd'hui</span></div>
+   2) OU marquer la transaction qui commence aujourd'hui :
+      <div class="tx" data-today="true"> ... </div>
+*/
+
+/* 1) Separateur autonome */
+.today-divider {
+  position: relative;
+  height: 20px;
+  margin: 8px 0;
+}
+
+.today-divider::before {
+  content: "";
+  position: absolute;
+  left: 12px;            /* aligné sur le padding de .middle */
+  right: 12px;
+  top: 50%;
+  height: 2px;
+  background: var(--red);
+  transform: translateY(-50%);
+  border-radius: 2px;
+}
+
+.today-divider .bubble {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 2px solid var(--red);
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.25);
+}
+
+/* 2) Pseudo-éléments directement sur .tx si vous préférez ajouter un attribut */
+.tx[data-today="true"] {
+  position: relative;
+  margin-top: 14px; /* espace pour la ligne/bulle créée par les pseudo-éléments */
+}
+
+.tx[data-today="true"]::before {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: -12px;
+  height: 2px;
+  background: var(--red);
+  border-radius: 2px;
+}
+
+.tx[data-today="true"]::after {
+  content: "aujourd'hui";
+  position: absolute;
+  left: 50%;
+  top: -22px;
+  transform: translateX(-50%);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 2px solid var(--red);
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.25);
+}
