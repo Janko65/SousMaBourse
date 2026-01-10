@@ -130,21 +130,48 @@ button {
 .tx {
   background: var(--panel);
   border-radius: 12px;
-  padding: 8px 10px;        /* réduit */
-  margin-bottom: 6px;       /* réduit */
+  padding: 6px 8px;        /* réduit pour compacter la hauteur */
+  margin-bottom: 6px;      /* réduit */
   display: grid;
   grid-template-columns: 28px 72px 1fr 44px; /* colonnes légèrement plus compactes */
   align-items: center;
   gap: 8px;
   position: relative; /* permet pseudo-éléments si on utilise data-today */
+  min-height: 36px;   /* garantit que la transaction reste plus grande que la checkbox */
 }
+
+/* Séparer la taille de la checkbox pour qu'elle soit un peu plus petite que la tx */
+.tx input[type="checkbox"] {
+  justify-self: center;
+  width: 18px;
+  height: 18px;
+  /* fallback si certains navigateurs ignorent width/height :
+     on applique aussi un scale léger pour réduire l'apparence */
+  transform: scale(1);
+  -webkit-transform: scale(1);
+  appearance: auto;
+  -webkit-appearance: checkbox;
+  margin: 0;
+}
+
+/* Si tu veux forcer un rendu identique sur tous les navigateurs,
+   remplacer appearance par ceci (décommenter) et styliser manuellement :
+.tx input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid var(--border);
+  background: transparent;
+}
+.tx input[type="checkbox"]:checked {
+  background: var(--green); border-color: var(--green);
+}
+*/
 
 .tx.debit { border-left: 4px solid var(--red); }
 .tx.credit { border-left: 4px solid var(--green); }
-
-.tx input[type="checkbox"] {
-  justify-self: center;
-}
 
 .tx .amount {
   font-size: 15px;
