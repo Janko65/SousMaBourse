@@ -64,12 +64,11 @@ button { height: 44px; border-radius: 10px; border: none; font-size: 14px; font-
 }
 
 .tx input[type="checkbox"] {
+  justify-self: center;
   width: 18px;
   height: 18px;
-
-  padding: 14px;     /* zone cliquable ajoutée */
-  margin: -14px;     /* neutralise l’impact visuel */
-
+  transform: scale(1);
+  margin: -6px; /* zone cliquable plus large */
   cursor: pointer;
 }
 .tx.debit { border-left: 4px solid var(--red); }
