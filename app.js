@@ -12,6 +12,20 @@ let settings = JSON.parse(localStorage.getItem(LS.settings)) || { startDay: 1 };
 let editingId = null;
 const today = new Date();
 
+function getPeriodStart() {
+  let y = today.getFullYear();
+  let m = today.getMonth();
+  const currentStart = effDay(settings.startDay, y, m);
+  if (today.getDate() < currentStart) {
+    m -= 1;
+    if (m < 0) {
+      m = 11;
+      y -= 1;
+    }
+  }
+  return { year: y, month: m, start: effDay(settings.startDay, y, m) };
+}
+
 function getPeriodKey() {
   const p = getPeriodStart();
   return `${p.year}-${p.month}-${p.start}`;
@@ -59,32 +73,27 @@ for (let i = 1; i <= 31; i++) {
 }
 
 /* DATE UTILS */
-function lastDay(y, m) { return new Date(y, m + 1, 0).getDate(); }
-function effDay(d, y, m) { return Math.min(d, lastDay(y, m)); }
-
-/* PERIOD HELPERS */
-function getPeriodStart() {
-  let y = today.getFullYear();
-  let m = today.getMonth();
-  const currentStart = effDay(settings.startDay, y, m);
-  if (today.getDate() < currentStart) {
-    m -= 1;
-    if (m < 0) { m = 11; y -= 1; }
-  }
-  return { year: y, month: m, start: effDay(settings.startDay, y, m) };
+function lastDay(y, m) {
+  return new Date(y, m + 1, 0).getDate();
+}
+function effDay(d, y, m) {
+  return Math.min(d, lastDay(y, m));
 }
 
+/* PERIOD HELPERS */
 function txDateForDay(day) {
   const ps = getPeriodStart();
   let txYear = ps.year;
   let txMonth = ps.month;
   if (day < settings.startDay) {
     txMonth += 1;
-    if (txMonth > 11) { txMonth = 0; txYear += 1; }
+    if (txMonth > 11) {
+      txMonth = 0;
+      txYear += 1;
+    }
   }
   return new Date(txYear, txMonth, effDay(day, txYear, txMonth));
 }
-
 function txDateInPeriod(t) { return txDateForDay(t.day); }
 
 function periodEnd() {
@@ -93,7 +102,10 @@ function periodEnd() {
   const d = today.getDate();
   const currentStart = effDay(settings.startDay, y, m);
   let nextY = y, nextM = m;
-  if (d >= currentStart) { nextM += 1; if (nextM > 11) { nextM = 0; nextY += 1; } }
+  if (d >= currentStart) {
+    nextM += 1;
+    if (nextM > 11) { nextM = 0; nextY += 1; }
+  }
   const nextStart = effDay(settings.startDay, nextY, nextM);
   return new Date(nextY, nextM, nextStart - 1);
 }
@@ -109,7 +121,8 @@ function saveAll() {
 function calculate() {
   let remaining = balance;
   const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const endDate = periodEnd();
+  const end = periodEnd();
+  const endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
 
   transactions.forEach(t => {
     const txDate = txDateInPeriod(t);
@@ -129,13 +142,13 @@ function calculate() {
 /* EXPORT / IMPORT */
 function exportData() {
   const payload = { v: 1, balance, settings, transactions };
-  navigator.clipboard.writeText(JSON.stringify(payload));
+  const text = JSON.stringify(payload);
+  navigator.clipboard.writeText(text);
 }
 
 function importData(text) {
   const data = JSON.parse(text);
   if (!data || data.v !== 1 || !Array.isArray(data.transactions)) throw new Error("Format invalide");
-
   balance = Number(data.balance) || 0;
   settings = data.settings || { startDay: 1 };
   transactions = data.transactions;
@@ -157,24 +170,20 @@ function render() {
       const row = document.createElement("div");
       row.className = `tx ${t.type}`;
       const txDate = txDateInPeriod(t);
-
       if (!todayMarked && txDate >= todayDate) {
         row.dataset.today = "true";
         todayMarked = true;
       }
-
       const chk = document.createElement("input");
       chk.type = "checkbox";
       chk.checked = t.checked;
       chk.onclick = e => { e.stopPropagation(); t.checked = chk.checked; saveAll(); calculate(); };
-
       row.append(
         chk,
         Object.assign(document.createElement("span"), { className: "amount", textContent: formatEUR(t.amount) }),
         Object.assign(document.createElement("span"), { textContent: t.title }),
         Object.assign(document.createElement("span"), { textContent: "J" + effDay(t.day, today.getFullYear(), today.getMonth()) })
       );
-
       row.onclick = () => openTx(t);
       txList.appendChild(row);
     });
@@ -201,40 +210,64 @@ function openTx(t) {
 }
 
 /* EVENTS */
-document.getElementById("saveBalance").onclick = () => { balance = Number(balanceInput.value) || 0; saveAll(); balanceModal.close(); render(); };
-document.getElementById("addTx").onclick = () => { editingId = null; txAmount.value = txTitle.value = txDay.value = ""; txType.value = "debit"; document.getElementById("deleteTx").classList.add("hidden"); txModal.showModal(); };
-document.getElementById("saveTx").onclick = () => {
-  const amount = Number(txAmount.value);
-  const day = Number(txDay.value);
-  if (!amount || !day) return;
-  const txObj = { id: editingId || crypto.randomUUID(), amount, title: txTitle.value || "Transaction", day, type: txType.value, checked: false };
-  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const txDate = txDateForDay(day);
-  txObj.checked = txDate <= todayDate;
-  transactions = editingId ? transactions.map(t => t.id === editingId ? txObj : t) : [...transactions, txObj];
+document.getElementById("saveBalance").onclick = () => {
+  balance = Number(balanceInput.value) || 0;
   saveAll();
-  txModal.close();
+  balanceModal.close();
   render();
 };
-document.getElementById("deleteTx").onclick = () => { transactions = transactions.filter(t => t.id !== editingId); saveAll(); txModal.close(); render(); };
-document.getElementById("cancelTx").onclick = () => txModal.close();
-document.getElementById("periodBtn").onclick = () => { startDay.value = settings.startDay; periodModal.showModal(); };
-document.getElementById("savePeriod").onclick = () => { settings.startDay = Number(startDay.value); saveAll(); periodModal.close(); calculate(); render(); };
 
-/* MODALE PLUS */
-const moreBtn = document.getElementById("moreBtn");
-if (moreBtn) moreBtn.onclick = () => moreModal.showModal();
+document.getElementById("addTx").onclick = () => {
+  editingId = null;
+  txAmount.value = txTitle.value = txDay.value = "";
+  txType.value = "debit";
+  document.getElementById("deleteTx").classList.add("hidden");
+  txModal.showModal();
+};
 
-const backupBtn = document.getElementById("backupData");
-const restoreBtn = document.getElementById("restoreData");
-const resetBtn = document.getElementById("hardReset");
-
-if (backupBtn) backupBtn.onclick = () => { exportData(); alert("Données copiées dans le presse-papiers"); };
-if (restoreBtn) restoreBtn.onclick = () => {
+/* MODALE PLUS… */
+document.getElementById("moreBtn").onclick = () => moreModal.showModal();
+document.getElementById("backupData").onclick = () => { exportData(); alert("Données copiées dans le presse-papiers"); };
+document.getElementById("restoreData").onclick = () => {
   const text = prompt("Collez ici vos données sauvegardées");
   if (!text) return;
   try { importData(text); location.reload(); } catch { alert("Données invalides"); }
 };
-if (resetBtn) resetBtn.onclick = () => { if (confirm("Tout effacer ?")) { localStorage.clear(); location.reload(); } };
+document.getElementById("hardReset").onclick = () => { if(confirm("Tout effacer ?")) { localStorage.clear(); location.reload(); } };
+
+/* SAVE / DELETE TRANSACTIONS */
+document.getElementById("saveTx").onclick = () => {
+  const amount = Number(txAmount.value);
+  const day = Number(txDay.value);
+  if (!amount || !day) return;
+
+  const txObj = {
+    id: editingId || crypto.randomUUID(),
+    amount,
+    title: txTitle.value || "Transaction",
+    day,
+    type: txType.value,
+    checked: false
+  };
+
+  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const txDate = txDateForDay(day);
+  txObj.checked = txDate <= todayDate;
+
+  transactions = editingId
+    ? transactions.map(t => t.id === editingId ? txObj : t)
+    : [...transactions, txObj];
+
+  saveAll();
+  txModal.close();
+  render();
+};
+
+document.getElementById("deleteTx").onclick = () => { transactions = transactions.filter(t => t.id !== editingId); saveAll(); txModal.close(); render(); };
+document.getElementById("cancelTx").onclick = () => txModal.close();
+
+/* PERIOD */
+document.getElementById("periodBtn").onclick = () => { startDay.value = settings.startDay; periodModal.showModal(); };
+document.getElementById("savePeriod").onclick = () => { settings.startDay = Number(startDay.value); saveAll(); periodModal.close(); calculate(); render(); };
 
 render();
