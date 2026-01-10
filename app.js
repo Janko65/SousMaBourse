@@ -12,59 +12,7 @@ let settings = JSON.parse(localStorage.getItem(LS.settings)) || { startDay: 1 };
 let editingId = null;
 const today = new Date();
 
-const currentPeriodKey = getPeriodKey();
-const storedPeriodKey = localStorage.getItem(LS.periodKey);
-
-if (storedPeriodKey !== currentPeriodKey) {
-  transactions = transactions.map(t => ({
-    ...t,
-    checked: false
-  }));
-  localStorage.setItem(LS.periodKey, currentPeriodKey);
-  saveAll();
-}
-
-
-/* DOM */
-const todayEl = document.getElementById("today");
-const periodInfo = document.getElementById("periodInfo");
-const dailyAmount = document.getElementById("dailyAmount");
-const balanceDisplay = document.getElementById("balanceDisplay");
-const txList = document.getElementById("txList");
-
-const balanceModal = document.getElementById("balanceModal");
-const txModal = document.getElementById("txModal");
-const periodModal = document.getElementById("periodModal");
-
-const balanceInput = document.getElementById("balanceInput");
-const txAmount = document.getElementById("txAmount");
-const txTitle = document.getElementById("txTitle");
-const txDay = document.getElementById("txDay");
-const txType = document.getElementById("txType");
-const startDay = document.getElementById("startDay");
-
-/* FORMAT */
-function formatEUR(v) {
-  return v % 1 === 0 ? v + "€" : v.toFixed(2).replace(".", ",") + "€";
-}
-
-/* INIT */
-todayEl.textContent = today.toLocaleDateString("fr-FR");
-
-for (let i = 1; i <= 31; i++) {
-  txDay.add(new Option(i, i));
-  startDay.add(new Option(i, i));
-}
-
-/* DATE UTILS */
-function lastDay(y, m) {
-  return new Date(y, m + 1, 0).getDate();
-}
-function effDay(d, y, m) {
-  return Math.min(d, lastDay(y, m));
-}
-
-/* PERIOD HELPERS */
+/* --- PERIOD KEY CHECK --- */
 function getPeriodStart() {
   let y = today.getFullYear();
   let m = today.getMonth();
@@ -79,6 +27,62 @@ function getPeriodStart() {
   return { year: y, month: m, start: effDay(settings.startDay, y, m) };
 }
 
+function getPeriodKey() {
+  const p = getPeriodStart();
+  return `${p.year}-${p.month}-${p.start}`;
+}
+
+const currentPeriodKey = getPeriodKey();
+const storedPeriodKey = localStorage.getItem(LS.periodKey);
+
+if (storedPeriodKey !== currentPeriodKey) {
+  transactions = transactions.map(t => ({
+    ...t,
+    checked: false
+  }));
+}
+
+/* --- DOM --- */
+const todayEl = document.getElementById("today");
+const periodInfo = document.getElementById("periodInfo");
+const dailyAmount = document.getElementById("dailyAmount");
+const balanceDisplay = document.getElementById("balanceDisplay");
+const txList = document.getElementById("txList");
+
+const balanceModal = document.getElementById("balanceModal");
+const txModal = document.getElementById("txModal");
+const periodModal = document.getElementById("periodModal");
+const moreModal = document.getElementById("moreModal");
+
+const balanceInput = document.getElementById("balanceInput");
+const txAmount = document.getElementById("txAmount");
+const txTitle = document.getElementById("txTitle");
+const txDay = document.getElementById("txDay");
+const txType = document.getElementById("txType");
+const startDay = document.getElementById("startDay");
+
+/* --- FORMAT --- */
+function formatEUR(v) {
+  return v % 1 === 0 ? v + "€" : v.toFixed(2).replace(".", ",") + "€";
+}
+
+/* --- INIT --- */
+todayEl.textContent = today.toLocaleDateString("fr-FR");
+
+for (let i = 1; i <= 31; i++) {
+  txDay.add(new Option(i, i));
+  startDay.add(new Option(i, i));
+}
+
+/* --- DATE UTILS --- */
+function lastDay(y, m) {
+  return new Date(y, m + 1, 0).getDate();
+}
+function effDay(d, y, m) {
+  return Math.min(d, lastDay(y, m));
+}
+
+/* --- PERIOD HELPERS --- */
 function txDateForDay(day) {
   const ps = getPeriodStart();
   let txYear = ps.year;
@@ -99,7 +103,7 @@ function txDateInPeriod(t) {
   return txDateForDay(t.day);
 }
 
-/* PERIOD */
+/* --- PERIOD --- */
 function periodEnd() {
   const y = today.getFullYear();
   const m = today.getMonth();
@@ -114,27 +118,19 @@ function periodEnd() {
   return new Date(nextY, nextM, nextStart - 1);
 }
 
-function getPeriodKey() {
-  const p = getPeriodStart();
-  return `${p.year}-${p.month}-${p.start}`;
-}
-
-/* STORAGE */
+/* --- STORAGE --- */
 function saveAll() {
   localStorage.setItem(LS.balance, balance);
   localStorage.setItem(LS.tx, JSON.stringify(transactions));
   localStorage.setItem(LS.settings, JSON.stringify(settings));
+  localStorage.setItem(LS.periodKey, getPeriodKey());
 }
 
-/* CALC */
+/* --- CALC --- */
 function calculate() {
   let remaining = balance;
 
-  const todayDate = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate()
-  );
+  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const end = periodEnd();
   const endDate = new Date(end.getFullYear(), end.getMonth(), end.getDate());
 
@@ -153,16 +149,32 @@ function calculate() {
   periodInfo.textContent = `du ${settings.startDay} au ${endDate.getDate()}`;
 }
 
-/* RENDER */
+/* --- BACKUP / RESTORE --- */
+function exportData() {
+  const payload = { v: 1, balance, settings, transactions };
+  navigator.clipboard.writeText(JSON.stringify(payload));
+}
+
+function importData(text) {
+  const data = JSON.parse(text);
+  if (!data || data.v !== 1 || !Array.isArray(data.transactions)) {
+    throw new Error("Format invalide");
+  }
+
+  balance = Number(data.balance) || 0;
+  settings = data.settings || { startDay: 1 };
+  transactions = data.transactions;
+
+  localStorage.removeItem(LS.periodKey); // permet recalcul automatique
+  saveAll();
+}
+
+/* --- RENDER --- */
 function render() {
   balanceDisplay.querySelector(".amount").textContent = formatEUR(balance);
   txList.innerHTML = "";
 
-  const todayDate = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate()
-  );
+  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   let todayMarked = false;
 
   transactions
@@ -209,7 +221,7 @@ function render() {
   calculate();
 }
 
-/* MODALES */
+/* --- MODALES --- */
 balanceDisplay.onclick = () => {
   balanceModal.showModal();
   setTimeout(() => balanceInput.focus(), 150);
@@ -218,7 +230,10 @@ balanceModal.onclick = e => e.target === balanceModal && balanceModal.close();
 txModal.onclick = e => e.target === txModal && txModal.close();
 periodModal.onclick = e => e.target === periodModal && periodModal.close();
 
-/* TRANSACTIONS */
+document.getElementById("moreBtn").onclick = () => moreModal.showModal();
+moreModal.onclick = e => e.target === moreModal && moreModal.close();
+
+/* --- TRANSACTIONS --- */
 function openTx(t) {
   editingId = t.id;
   txAmount.value = t.amount;
@@ -229,7 +244,7 @@ function openTx(t) {
   txModal.showModal();
 }
 
-/* EVENTS */
+/* --- EVENTS --- */
 document.getElementById("saveBalance").onclick = () => {
   balance = Number(balanceInput.value) || 0;
   saveAll();
@@ -294,11 +309,29 @@ document.getElementById("savePeriod").onclick = () => {
   render();
 };
 
-document.getElementById("reset").onclick = () => {
+/* --- PLUS… MODAL --- */
+document.getElementById("backupData").onclick = () => {
+  exportData();
+  alert("Données copiées dans le presse-papiers");
+};
+
+document.getElementById("restoreData").onclick = () => {
+  const text = prompt("Collez ici vos données sauvegardées");
+  if (!text) return;
+  try {
+    importData(text);
+    location.reload();
+  } catch {
+    alert("Données invalides");
+  }
+};
+
+document.getElementById("hardReset").onclick = () => {
   if (confirm("Tout effacer ?")) {
     localStorage.clear();
     location.reload();
   }
 };
 
+/* --- RENDER INIT --- */
 render();
