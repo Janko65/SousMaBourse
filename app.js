@@ -1,7 +1,8 @@
 const LS = {
   balance: "balance",
   tx: "transactions",
-  settings: "settings"
+  settings: "settings",
+  periodKey: "periodKey"
 };
 
 let balance = Number(localStorage.getItem(LS.balance)) || 0;
@@ -10,6 +11,19 @@ let settings = JSON.parse(localStorage.getItem(LS.settings)) || { startDay: 1 };
 
 let editingId = null;
 const today = new Date();
+
+const currentPeriodKey = getPeriodKey();
+const storedPeriodKey = localStorage.getItem(LS.periodKey);
+
+if (storedPeriodKey !== currentPeriodKey) {
+  transactions = transactions.map(t => ({
+    ...t,
+    checked: false
+  }));
+  localStorage.setItem(LS.periodKey, currentPeriodKey);
+  saveAll();
+}
+
 
 /* DOM */
 const todayEl = document.getElementById("today");
@@ -98,6 +112,11 @@ function periodEnd() {
   }
   const nextStart = effDay(settings.startDay, nextY, nextM);
   return new Date(nextY, nextM, nextStart - 1);
+}
+
+function getPeriodKey() {
+  const p = getPeriodStart();
+  return `${p.year}-${p.month}-${p.start}`;
 }
 
 /* STORAGE */
