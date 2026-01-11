@@ -120,10 +120,19 @@ function calculate() {
 
   transactions.forEach(t => {
     const d = txDateForDay(t.day);
+
     if (d >= new Date(ps.year, ps.month, ps.start) && d <= pe) {
       const value = t.type === "debit" ? -t.amount : t.amount;
-      monthlyTotal += value;
-      if (!t.checked && d <= pe) remaining += value;
+
+      // ✅ TOTAL DES DÉPENSES = DÉBITS UNIQUEMENT
+      if (t.type === "debit") {
+        monthlyTotal += t.amount;
+      }
+
+      // reste journalier inchangé
+      if (!t.checked && d <= pe) {
+        remaining += value;
+      }
     }
   });
 
@@ -158,6 +167,7 @@ function render() {
     .forEach(t => {
       const row = document.createElement("div");
       row.className = `tx ${t.type}`;
+
       const txDate = txDateForDay(t.day);
       if (!todayMarked && txDate >= todayDate) {
         row.dataset.today = "true";
@@ -167,14 +177,18 @@ function render() {
       const chk = document.createElement("input");
       chk.type = "checkbox";
       chk.checked = t.checked;
-      chk.style.accentColor = chk.checked ? (t.type === "debit" ? "var(--red)" : "var(--green)") : "";
+      chk.style.accentColor = chk.checked
+        ? (t.type === "debit" ? "var(--red)" : "var(--green)")
+        : "";
 
       chk.onclick = e => {
         e.stopPropagation();
         t.checked = chk.checked;
         saveAll();
         calculate();
-        chk.style.accentColor = chk.checked ? (t.type === "debit" ? "var(--red)" : "var(--green)") : "";
+        chk.style.accentColor = chk.checked
+          ? (t.type === "debit" ? "var(--red)" : "var(--green)")
+          : "";
       };
 
       row.append(
@@ -191,14 +205,20 @@ function render() {
   calculate();
 }
 
-/* EVENTS & BUTTONS — inchangés */
+/* EVENTS & BUTTONS */
 balanceDisplay.onclick = () => { balanceModal.showModal(); setTimeout(() => balanceInput.focus(), 150); };
 balanceModal.onclick = e => e.target === balanceModal && balanceModal.close();
 txModal.onclick = e => e.target === txModal && txModal.close();
 periodModal.onclick = e => e.target === periodModal && periodModal.close();
 moreModal.onclick = e => e.target === moreModal && moreModal.close();
 
-document.getElementById("saveBalance").onclick = () => { balance = Number(balanceInput.value) || 0; saveAll(); balanceModal.close(); render(); };
+document.getElementById("saveBalance").onclick = () => {
+  balance = Number(balanceInput.value) || 0;
+  saveAll();
+  balanceModal.close();
+  render();
+};
+
 document.getElementById("addTx").onclick = () => {
   editingId = null;
   txAmount.value = txTitle.value = txDay.value = "";
@@ -206,6 +226,7 @@ document.getElementById("addTx").onclick = () => {
   document.getElementById("deleteTx").classList.add("hidden");
   txModal.showModal();
 };
+
 document.getElementById("saveTx").onclick = () => {
   const amount = Number(txAmount.value), day = Number(txDay.value);
   if (!amount || !day) return;
@@ -243,8 +264,10 @@ document.getElementById("periodBtn").onclick = () => { startDay.value = settings
 document.getElementById("savePeriod").onclick = () => { settings.startDay = Number(startDay.value); saveAll(); periodModal.close(); render(); };
 document.getElementById("moreBtn").onclick = () => moreModal.showModal();
 
-/* BACKUP / RESTORE / RESET inchangé */
-function exportData() { navigator.clipboard.writeText(JSON.stringify({ v: 1, balance, settings, transactions })); }
+/* BACKUP / RESTORE / RESET */
+function exportData() {
+  navigator.clipboard.writeText(JSON.stringify({ v: 1, balance, settings, transactions }));
+}
 function importData(text) {
   const d = JSON.parse(text);
   if (!d || d.v !== 1 || !Array.isArray(d.transactions)) throw Error("Format invalide");
@@ -254,13 +277,22 @@ function importData(text) {
   saveAll();
 }
 
-document.getElementById("backupData").onclick = () => { exportData(); alert("Données copiées dans le presse-papiers"); };
+document.getElementById("backupData").onclick = () => {
+  exportData();
+  alert("Données copiées dans le presse-papiers");
+};
 document.getElementById("restoreData").onclick = () => {
   const text = prompt("Collez ici vos données sauvegardées");
   if (!text) return;
-  try { importData(text); location.reload(); } catch { alert("Données invalides"); }
+  try { importData(text); location.reload(); }
+  catch { alert("Données invalides"); }
 };
-document.getElementById("hardReset").onclick = () => { if (confirm("Tout effacer ?")) { localStorage.clear(); location.reload(); } };
+document.getElementById("hardReset").onclick = () => {
+  if (confirm("Tout effacer ?")) {
+    localStorage.clear();
+    location.reload();
+  }
+};
 
 render();
 setTimeout(scrollToFirstUnchecked, 150);
