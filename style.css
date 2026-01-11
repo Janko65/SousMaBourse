@@ -11,33 +11,127 @@
   --border: #2a2f3a;
 }
 
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; overflow: hidden; }
-
-/* STRUCTURE */
-.top, .bottom {
-  position: fixed; left: 0; right: 0; height: 120px; padding: 14px 16px; background: var(--panel); z-index: 10;
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.top { top: 0; display: flex; flex-direction: column; justify-content: space-between; }
-.bottom { bottom: 0; display: flex; align-items: center; justify-content: center; }
-.middle { position: absolute; top: 120px; bottom: 120px; left: 0; right: 0; padding: 12px; overflow-y: auto; }
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow: hidden;
+}
+
+/* STRUCTURE */
+.top {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 168px;            /* CORRIGÉ : SUFFISANT POUR TOUT LE CONTENU */
+  padding: 14px 16px;
+  background: var(--panel);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.bottom {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 120px;            /* INCHANGÉ */
+  padding: 14px 16px;
+  background: var(--panel);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.middle {
+  position: absolute;
+  top: 168px;               /* ALIGNÉ EXACTEMENT */
+  bottom: 120px;
+  left: 0;
+  right: 0;
+  padding: 12px;
+  overflow-y: auto;
+}
 
 /* TOP */
-.top-line { display: flex; justify-content: space-between; }
-.amount { font-size: 32px; font-weight: 700; }
-.sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
-.date-block { text-align: right; font-size: 13px; color: var(--muted); }
-.period-info { font-size: 12px; margin-top: 2px; }
+.amount {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* TEXTE DE PERIODE */
+.period-summary {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+/* INFO CENTRALE */
+.today-remaining {
+  text-align: center;
+  margin-top: 4px;
+}
 
 /* BUTTONS */
-.top-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-button { height: 44px; border-radius: 10px; border: none; font-size: 14px; font-weight: 600; }
-.primary { background: var(--green); color: #fff; }
-.secondary { background: var(--gray); color: var(--text); }
-.danger { background: var(--red); color: #fff; }
-.full { width: 100%; }
+.top-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.top-actions.compact {
+  margin-top: 6px;
+}
+
+button {
+  height: 44px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.top-actions.compact button {
+  height: 40px;
+  font-size: 13px;
+  border-radius: 9px;
+}
+
+.primary {
+  background: var(--green);
+  color: #fff;
+}
+
+.secondary {
+  background: var(--gray);
+  color: var(--text);
+}
+
+.danger {
+  background: var(--red);
+  color: #fff;
+}
+
+.full {
+  width: 100%;
+}
 
 /* BOTTOM */
 .balance-editable {
@@ -65,25 +159,94 @@ button { height: 44px; border-radius: 10px; border: none; font-size: 14px; font-
 
 .tx input[type="checkbox"] {
   justify-self: center;
-  width: 22px;       /* légèrement plus petit */
-  height: 22px;      /* légèrement plus petit */
-  transform: scale(1.3); /* agrandi visuellement mais moins qu'avant */
-  margin: -20px;     
+  width: 22px;
+  height: 22px;
+  transform: scale(1.3);
+  margin: -20px;
   cursor: pointer;
 }
 
-.tx.debit { border-left: 4px solid var(--red); }
-.tx.credit { border-left: 4px solid var(--green); }
-.tx .amount { font-size: 15px; font-weight: 600; }
+.tx.debit {
+  border-left: 4px solid var(--red);
+}
+
+.tx.credit {
+  border-left: 4px solid var(--green);
+}
+
+.tx .amount {
+  font-size: 15px;
+  font-weight: 600;
+}
 
 /* MODALES */
-dialog { border: none; border-radius: 18px; padding: 20px; width: 90%; max-width: 340px; background: var(--panel); color: var(--text); }
-dialog::backdrop { background: rgba(0,0,0,.6); }
-input, select { width: 100%; height: 44px; border-radius: 10px; border: 1px solid var(--border); background: var(--panel-alt); color: var(--text); font-size: 16px; text-align: center; margin-bottom: 12px; }
-.modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-.hidden { display: none; }
+dialog {
+  border: none;
+  border-radius: 18px;
+  padding: 20px;
+  width: 90%;
+  max-width: 340px;
+  background: var(--panel);
+  color: var(--text);
+}
+
+dialog::backdrop {
+  background: rgba(0,0,0,.6);
+}
+
+input, select {
+  width: 100%;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel-alt);
+  color: var(--text);
+  font-size: 16px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.hidden {
+  display: none;
+}
 
 /* TODAY */
-.tx[data-today="true"] { position: relative; margin-top: 14px; }
-.tx[data-today="true"]::before { content: ""; position: absolute; left: 12px; right: 12px; top: -12px; height: 2px; background: var(--red); border-radius: 2px; }
-.tx[data-today="true"]::after { content: "aujourd'hui"; position: absolute; left: 50%; top: -22px; transform: translateX(-50%); background: var(--panel); color: var(--text); font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 2px solid var(--red); line-height: 1; white-space: nowrap; box-shadow: 0 1px 0 rgba(0,0,0,0.25); }
+.tx[data-today="true"] {
+  position: relative;
+  margin-top: 14px;
+}
+
+.tx[data-today="true"]::before {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: -12px;
+  height: 2px;
+  background: var(--red);
+  border-radius: 2px;
+}
+
+.tx[data-today="true"]::after {
+  content: "aujourd'hui";
+  position: absolute;
+  left: 50%;
+  top: -22px;
+  transform: translateX(-50%);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 2px solid var(--red);
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.25);
+}

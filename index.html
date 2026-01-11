@@ -12,25 +12,29 @@
 <body>
 
 <header class="top">
-  <div class="top-line">
-    <div class="amount-block">
-      <div id="dailyAmount" class="amount">0€</div>
-      <div class="sub">
-        de disponible par jour jusqu’à la fin du mois.
-      </div>
-    </div>
 
-    <div class="date-block">
-      <div id="today"></div>
-      <div id="periodInfo" class="period-info"></div>
+  <!-- TEXTE DE CONTEXTE -->
+  <div class="period-summary">
+    Dans la période, du <span id="periodStart">x</span> au <span id="periodEnd">x</span>,
+    le total de vos dépenses mensuelles est de
+    <strong id="monthlyTotal">TANT</strong>.
+  </div>
+
+  <!-- INFO PRINCIPALE -->
+  <div class="today-remaining">
+    <div id="dailyAmount" class="amount">0€</div>
+    <div class="sub">
+      de disponible par jour jusqu’à la fin du mois.
     </div>
   </div>
 
-  <div class="top-actions">
+  <!-- ACTIONS -->
+  <div class="top-actions compact">
     <button id="periodBtn" class="secondary">Période</button>
     <button id="addTx" class="primary">Transaction mensuelle</button>
     <button id="moreBtn" class="secondary">Plus…</button>
   </div>
+
 </header>
 
 <main id="txList" class="middle"></main>
