@@ -124,12 +124,10 @@ function calculate() {
     if (d >= new Date(ps.year, ps.month, ps.start) && d <= pe) {
       const value = t.type === "debit" ? -t.amount : t.amount;
 
-      // ✅ TOTAL DES DÉPENSES = DÉBITS UNIQUEMENT
       if (t.type === "debit") {
         monthlyTotal += t.amount;
       }
 
-      // reste journalier inchangé
       if (!t.checked && d <= pe) {
         remaining += value;
       }
@@ -138,7 +136,12 @@ function calculate() {
 
   monthlyTotalEl.textContent = formatEUR(monthlyTotal);
 
-  const days = Math.max(1, Math.floor((pe - todayDate) / 86400000));
+  // ✅ CORRECTION ICI : inclusion du jour courant ET du dernier jour
+  const days = Math.max(
+    1,
+    Math.floor((pe - todayDate) / 86400000) + 1
+  );
+
   dailyAmount.textContent = formatEUR(remaining / days);
 }
 
