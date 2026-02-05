@@ -172,7 +172,7 @@ function render() {
       row.className = `tx ${t.type}`;
 
       const txDate = txDateForDay(t.day);
-      if (!todayMarked && txDate >= todayDate) {
+      if (!todayMarked && txDate > todayDate) {
         row.dataset.today = "true";
         todayMarked = true;
       }
