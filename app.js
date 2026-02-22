@@ -373,7 +373,7 @@ document.getElementById("restoreData").onclick = () => {
 };
 
 document.getElementById("hardReset").onclick = () => {
-  if (confirm("Tout effacer ?")) {
+  if (confirm("Tout effacer (utile pour mettre à jour l'appli) ? Pensez à sauvegarder vos données pour les ré-insérer.")) {
     localStorage.clear();
     location.reload();
   }
