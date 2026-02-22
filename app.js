@@ -9,28 +9,12 @@ const LS = {
 let balance = Number(localStorage.getItem(LS.balance)) || 0;
 let transactions = JSON.parse(localStorage.getItem(LS.tx)) || [];
 let settings = JSON.parse(localStorage.getItem(LS.settings)) || { startDay: 1 };
-let theme = localStorage.getItem(LS.theme) || "dark";
-
-function updateThemeButton() {
-  const btn = document.getElementById("toggleTheme");
-  if (!btn) return;
-  btn.textContent = theme === "dark"
-    ? "Passer en mode clair"
-    : "Passer en mode sombre";
-}
-
-function applyTheme() {
-  document.documentElement.setAttribute("data-theme", theme);
-  updateThemeButton();
-}
+let currentTheme = localStorage.getItem(LS.theme) || "dark";
 
 let editingId = null;
 const today = new Date();
 
-/* ========================= */
-/* UTILITAIRES */
-/* ========================= */
-
+/* --- FONCTIONS DATE --- */
 function effDay(d, y, m) {
   return Math.min(d, new Date(y, m + 1, 0).getDate());
 }
@@ -56,23 +40,16 @@ function scrollToFirstUnchecked() {
   firstUnchecked.closest('.tx').scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-/* ========================= */
-/* RESET PERIODE */
-/* ========================= */
-
+/* --- PERIOD RESET --- */
 const currentPeriodKey = getPeriodKey();
 const storedPeriodKey = localStorage.getItem(LS.periodKey);
-
 if (storedPeriodKey !== currentPeriodKey) {
   transactions = transactions.map(t => ({ ...t, checked: false }));
   localStorage.setItem(LS.periodKey, currentPeriodKey);
   saveAll();
 }
 
-/* ========================= */
-/* DOM */
-/* ========================= */
-
+/* --- DOM --- */
 const dailyAmount = document.getElementById("dailyAmount");
 const balanceDisplay = document.getElementById("balanceDisplay");
 const txList = document.getElementById("txList");
@@ -93,29 +70,21 @@ const txDay = document.getElementById("txDay");
 const txType = document.getElementById("txType");
 const startDay = document.getElementById("startDay");
 
-/* ========================= */
-/* INIT SELECT */
-/* ========================= */
-
+/* INIT SELECTS */
 for (let i = 1; i <= 31; i++) {
   txDay.add(new Option(i, i));
   startDay.add(new Option(i, i));
 }
 
-/* ========================= */
-/* STORAGE */
-/* ========================= */
-
+/* --- STORAGE --- */
 function saveAll() {
   localStorage.setItem(LS.balance, balance);
   localStorage.setItem(LS.tx, JSON.stringify(transactions));
   localStorage.setItem(LS.settings, JSON.stringify(settings));
+  localStorage.setItem(LS.theme, currentTheme);
 }
 
-/* ========================= */
-/* FORMAT */
-/* ========================= */
-
+/* --- FORMAT --- */
 function formatEUR(v) {
   return v % 1 === 0 ? v + "€" : v.toFixed(2).replace(".", ",") + "€";
 }
@@ -124,31 +93,24 @@ function periodEnd() {
   const y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
   const start = effDay(settings.startDay, y, m);
   let ny = y, nm = m;
-
   if (d >= start) {
     nm += 1;
     if (nm > 11) { nm = 0; ny += 1; }
   }
-
   return new Date(ny, nm, effDay(settings.startDay, ny, nm) - 1);
 }
 
 function txDateForDay(day) {
   const ps = getPeriodStart();
   let y = ps.year, m = ps.month;
-
   if (day < settings.startDay) {
     m += 1;
     if (m > 11) { m = 0; y += 1; }
   }
-
   return new Date(y, m, effDay(day, y, m));
 }
 
-/* ========================= */
-/* CALCULS */
-/* ========================= */
-
+/* --- CALCULS --- */
 function calculate() {
   const ps = getPeriodStart();
   const pe = periodEnd();
@@ -168,6 +130,7 @@ function calculate() {
       const value = t.type === "debit" ? -t.amount : t.amount;
 
       if (t.type === "debit") monthlyTotal += t.amount;
+
       if (!t.checked && d <= pe) remaining += value;
     }
   });
@@ -178,10 +141,18 @@ function calculate() {
   dailyAmount.textContent = formatEUR(remaining / days);
 }
 
-/* ========================= */
-/* RENDER */
-/* ========================= */
+/* --- TRANSACTIONS --- */
+function openTx(t) {
+  editingId = t.id;
+  txAmount.value = t.amount;
+  txTitle.value = t.title;
+  txDay.value = t.day;
+  txType.value = t.type;
+  document.getElementById("deleteTx").classList.remove("hidden");
+  txModal.showModal();
+}
 
+/* --- RENDER --- */
 function render() {
   balanceDisplay.querySelector(".amount").textContent = formatEUR(balance);
   txList.innerHTML = "";
@@ -193,49 +164,30 @@ function render() {
     .slice()
     .sort((a, b) => txDateForDay(a.day) - txDateForDay(b.day))
     .forEach(t => {
-
       const row = document.createElement("div");
       row.className = `tx ${t.type}`;
 
       const txDate = txDateForDay(t.day);
-
-      if (!todayMarked && txDate > todayDate) {
-        row.dataset.today = "true";
-        todayMarked = true;
-      }
+      if (!todayMarked && txDate > todayDate) { row.dataset.today = "true"; todayMarked = true; }
 
       const chk = document.createElement("input");
       chk.type = "checkbox";
       chk.checked = t.checked;
-
-      function updateCheckboxColor() {
-        chk.style.accentColor = chk.checked
-          ? (t.type === "debit" ? "var(--red)" : "var(--green)")
-          : "";
-      }
-
-      updateCheckboxColor();
+      chk.style.accentColor = chk.checked ? (t.type === "debit" ? "var(--red)" : "var(--green)") : "";
 
       chk.onclick = e => {
         e.stopPropagation();
         t.checked = chk.checked;
         saveAll();
         calculate();
-        updateCheckboxColor();
+        chk.style.accentColor = chk.checked ? (t.type === "debit" ? "var(--red)" : "var(--green)") : "";
       };
 
       row.append(
         chk,
-        Object.assign(document.createElement("span"), {
-          className: "amount",
-          textContent: formatEUR(t.amount)
-        }),
-        Object.assign(document.createElement("span"), {
-          textContent: t.title
-        }),
-        Object.assign(document.createElement("span"), {
-          textContent: "J" + effDay(t.day, today.getFullYear(), today.getMonth())
-        })
+        Object.assign(document.createElement("span"), { className: "amount", textContent: formatEUR(t.amount) }),
+        Object.assign(document.createElement("span"), { textContent: t.title }),
+        Object.assign(document.createElement("span"), { textContent: "J" + effDay(t.day, today.getFullYear(), today.getMonth()) })
       );
 
       row.onclick = () => openTx(t);
@@ -245,29 +197,8 @@ function render() {
   calculate();
 }
 
-/* ========================= */
-/* TRANSACTION MODAL */
-/* ========================= */
-
-function openTx(t) {
-  editingId = t.id;
-  txAmount.value = t.amount;
-  txTitle.value = t.title;
-  txDay.value = t.day;
-  txType.value = t.type;
-  document.getElementById("deleteTx").classList.remove("hidden");
-  txModal.showModal();
-}
-
-/* ========================= */
-/* EVENTS */
-/* ========================= */
-
-balanceDisplay.onclick = () => {
-  balanceModal.showModal();
-  setTimeout(() => balanceInput.focus(), 150);
-};
-
+/* --- EVENTS --- */
+balanceDisplay.onclick = () => { balanceModal.showModal(); setTimeout(() => balanceInput.focus(), 150); };
 balanceModal.onclick = e => e.target === balanceModal && balanceModal.close();
 txModal.onclick = e => e.target === txModal && txModal.close();
 periodModal.onclick = e => e.target === periodModal && periodModal.close();
@@ -289,8 +220,7 @@ document.getElementById("addTx").onclick = () => {
 };
 
 document.getElementById("saveTx").onclick = () => {
-  const amount = Number(txAmount.value);
-  const day = Number(txDay.value);
+  const amount = Number(txAmount.value), day = Number(txDay.value);
   if (!amount || !day) return;
 
   const txObj = {
@@ -322,35 +252,12 @@ document.getElementById("deleteTx").onclick = () => {
 };
 
 document.getElementById("cancelTx").onclick = () => txModal.close();
-
-document.getElementById("periodBtn").onclick = () => {
-  startDay.value = settings.startDay;
-  periodModal.showModal();
-};
-
-document.getElementById("savePeriod").onclick = () => {
-  settings.startDay = Number(startDay.value);
-  saveAll();
-  periodModal.close();
-  render();
-};
-
+document.getElementById("periodBtn").onclick = () => { startDay.value = settings.startDay; periodModal.showModal(); };
+document.getElementById("savePeriod").onclick = () => { settings.startDay = Number(startDay.value); saveAll(); periodModal.close(); render(); };
 document.getElementById("moreBtn").onclick = () => moreModal.showModal();
 
-/* THEME */
-
-document.getElementById("toggleTheme").onclick = () => {
-  theme = theme === "dark" ? "light" : "dark";
-  localStorage.setItem(LS.theme, theme);
-  applyTheme();
-};
-
-/* BACKUP / RESTORE / RESET */
-
-function exportData() {
-  navigator.clipboard.writeText(JSON.stringify({ v: 1, balance, settings, transactions }));
-}
-
+/* --- BACKUP / RESTORE / RESET --- */
+function exportData() { navigator.clipboard.writeText(JSON.stringify({ v: 1, balance, settings, transactions })); }
 function importData(text) {
   const d = JSON.parse(text);
   if (!d || d.v !== 1 || !Array.isArray(d.transactions)) throw Error("Format invalide");
@@ -360,27 +267,35 @@ function importData(text) {
   saveAll();
 }
 
-document.getElementById("backupData").onclick = () => {
-  exportData();
-  alert("Données copiées dans le presse-papiers");
-};
-
+document.getElementById("backupData").onclick = () => { exportData(); alert("Données copiées dans le presse-papiers"); };
 document.getElementById("restoreData").onclick = () => {
   const text = prompt("Collez ici vos données sauvegardées");
   if (!text) return;
-  try { importData(text); location.reload(); }
-  catch { alert("Données invalides"); }
+  try { importData(text); location.reload(); } catch { alert("Données invalides"); }
+};
+document.getElementById("hardReset").onclick = () => { if(confirm("Tout effacer et mettre a jour l'appli ?")) { localStorage.clear(); location.reload(); } };
+
+/* --- THEME --- */
+function applyTheme() {
+  document.documentElement.setAttribute("data-theme", currentTheme);
+  const btn = document.getElementById("toggleTheme");
+  btn.textContent = currentTheme === "dark" ? "Passer en clair" : "Passer en sombre";
+}
+
+document.getElementById("toggleTheme").onclick = () => {
+  currentTheme = currentTheme === "dark" ? "light" : "dark";
+  applyTheme();
+  saveAll();
 };
 
-document.getElementById("hardReset").onclick = () => {
-  if (confirm("Tout effacer (utile pour mettre à jour l'appli) ? Pensez à sauvegarder vos données pour les ré-insérer.")) {
-    localStorage.clear();
-    location.reload();
-  }
-};
-
-/* INIT */
-
-applyTheme();
-render();
-setTimeout(scrollToFirstUnchecked, 150);
+/* --- SPLASH SCREEN --- */
+document.addEventListener("DOMContentLoaded", () => {
+  const splash = document.getElementById("splashScreen");
+  splash.style.display = "flex";
+  setTimeout(() => {
+    splash.style.display = "none";
+    applyTheme();
+    render();
+    setTimeout(scrollToFirstUnchecked, 150);
+  }, 1000);
+});
