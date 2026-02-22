@@ -84,7 +84,7 @@ html, body {
 .middle {
   position: absolute;
   top: 225px;
-  bottom: 105px;
+  bottom: 110px;
   left: 0;
   right: 0;
   padding: 12px;
@@ -97,7 +97,7 @@ html, body {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 105px;
+  height: 110px;
   padding: 14px 16px;
   background: var(--panel);
   z-index: 10;
@@ -114,7 +114,7 @@ html, body {
   text-align: center;
   cursor: pointer;
   background: var(--panel-alt);
-  min-width: 180px;         /* largeur minimale */
+  min-width: 170px;         /* largeur minimale */
   display: flex;
   flex-direction: column;
   justify-content: center;  /* texte centré verticalement */
