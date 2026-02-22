@@ -84,7 +84,7 @@ html, body {
 .middle {
   position: absolute;
   top: 225px;
-  bottom: 100px;
+  bottom: 105px;
   left: 0;
   right: 0;
   padding: 12px;
@@ -97,7 +97,7 @@ html, body {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 100px;
+  height: 105px;
   padding: 14px 16px;
   background: var(--panel);
   z-index: 10;
