@@ -208,11 +208,20 @@ function render() {
       chk.type = "checkbox";
       chk.checked = t.checked;
 
+      function updateCheckboxColor() {
+        chk.style.accentColor = chk.checked
+          ? (t.type === "debit" ? "var(--red)" : "var(--green)")
+          : "";
+      }
+
+      updateCheckboxColor();
+
       chk.onclick = e => {
         e.stopPropagation();
         t.checked = chk.checked;
         saveAll();
         calculate();
+        updateCheckboxColor();
       };
 
       row.append(
