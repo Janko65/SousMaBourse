@@ -15,8 +15,8 @@ let balance = Number(localStorage.getItem(LS.balance)) || 0;
 let transactions = JSON.parse(localStorage.getItem(LS.tx)) || [];
 let settings = JSON.parse(localStorage.getItem(LS.settings)) || { startDay: 1 };
 let currentTheme = localStorage.getItem(LS.theme) || "dark";
-let currentLang = localStorage.getItem(LS.lang) || "en"; // Par défaut : anglais
-let currentCurrency = localStorage.getItem(LS.currency) || "USD"; // Par défaut : dollar
+let currentLang = localStorage.getItem(LS.lang) || "fr"; // Par défaut : anglais
+let currentCurrency = localStorage.getItem(LS.currency) || "EUR"; // Par défaut : dollar
 
 let editingId = null;
 const today = new Date();
