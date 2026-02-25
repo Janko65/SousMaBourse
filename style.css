@@ -76,8 +76,8 @@ html, body {
 }
 
 .top .banner img {
-  max-width: 80%; /* Limite à 80% de la largeur de l’écran */
-  max-height: 80%; /* Limite à 80% de la hauteur de l’écran */
+  max-width: 90%; /* Limite à 80% de la largeur de l’écran */
+  max-height: 90%; /* Limite à 80% de la hauteur de l’écran */
 }
 
 /* MIDDLE */
