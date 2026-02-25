@@ -48,12 +48,12 @@ const i18n = {
     langToggle: "Switch in English",
     alertCopied: "Données copiées dans le presse-papiers",
     alertInvalid: "Restaurer les données avec le presse-papier ?",
-    alertReset: "Tout effacer et mettre à jour l'appli ?",
+    alertReset: "Tout effacer ?",
     placeholderAmount: "Montant",
     placeholderTitle: "Titre de la transaction",
     placeholderDate: "Date de la transaction",
     placeholderBalance: "Montant du solde",
-    startDayLabel: "Début du mois (Jour de paie ?)"
+    startDayLabel: "Début du mois (Jour de paie)"
   },
   en: {
     periodSummary: "From {start} to {end}, your expenses will be {total}.",
@@ -78,12 +78,12 @@ const i18n = {
     langToggle: "Passer en Français",
     alertCopied: "Data copied to clipboard",
     alertInvalid: "Use clipboard to restore your data",
-    alertReset: "Delete everything and update the app?",
+    alertReset: "Delete everything ?",
     placeholderAmount: "Amount",
     placeholderTitle: "Transaction title",
     placeholderDate: "Transaction date",
     placeholderBalance: "Balance amount",
-    startDayLabel: "Start of the month (Payday?)"
+    startDayLabel: "Start of the month (Payday)"
   }
 };
 
