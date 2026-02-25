@@ -329,7 +329,8 @@ function applyLanguage() {
   document.getElementById("cancelTx").textContent = t.cancel;
   document.getElementById("saveTx").textContent = t.save;
   document.getElementById("deleteTx").textContent = t.delete;
-
+document.getElementById("savePeriod").textContent = t.validate;
+document.getElementById("updateApp").textContent = t.update;
   document.querySelector("#txType option[value='debit']").textContent = t.debit;
   document.querySelector("#txType option[value='credit']").textContent = t.credit;
 
