@@ -27,10 +27,10 @@ const currencyMap = { EUR: "€", USD: "$", GBP: "£" };
 const i18n = {
   fr: {
     periodSummary: "Du {start} au {end}, vos dépenses seront de {total}.",
-    dailySub: "de disponible par jour pour ne pas être ric-rac à la fin du mois!",
+    dailySub: "de disponible par jour, en tenant compte de vos dépenses mensuelles,pour ne pas être ric-rac à la fin du mois!",
     balanceSub: "Indiquez le montant de votre compte bancaire et cochez les cases si les opérations sont passées",
     periodBtn: "Période",
-    addTx: "Mouvement d'argent",
+    addTx: "Dépenses mensuelles",
     moreBtn: "Plus…",
     backup: "Sauvegarder les données",
     restore: "Restaurer les données",
